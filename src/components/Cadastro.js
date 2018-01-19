@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Alert, AppRegistry, StyleSheet, View , Text, TextInput, ReactNative, TouchableOpacity,Label, Dimensions, ScrollView} from 'react-native';
+import { Alert, AppRegistry, StyleSheet, View , Text, TextInput, ReactNative, TouchableOpacity,Label, Dimensions, ScrollView, AsyncStorage} from 'react-native';
 import {FormLabel, FormInput, FormValidationMessage} from 'react-native-elements';
 import Modal from "react-native-modal";
 import {Button} from 'react-native-elements';
 import SocketIOClient from 'socket.io-client/dist/socket.io.js';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
+import { stringify } from 'querystring';
 
 export default class Home extends Component {
   constructor(props){
@@ -17,12 +18,28 @@ export default class Home extends Component {
         isVisible: false,
         space: 0,
     };
+    this.cadastrar = this.cadastrar.bind(this);
+    this.cadastrarCallback = this.cadastrarCallback.bind(this);
+    this.socket = SocketIOClient('http://192.168.11.51:3000', { timeout: 30000 });
+    this.socket.on('cadastrar',this.cadastrarCallback);
+  }
+
+  cadastrarCallback(cadastro){
+    const {navigate} = this.props.navigation; 
+    const { goBack } = this.props.navigation;
+    if(cadastro == false){
+      this.setState({isVisible: true});
+    }else{
+      AsyncStorage.setItem('remember_token', stringify(cadastro.remember_token));
+      AsyncStorage.setItem('id', stringify(cadastro.id));
+      navigate('Contatos');
+    }
   }
 
   cadastrar(){
-    const { navigate } = this.props.navigation;
-    const { goBack } = this.props.navigation;
+    this.socket.emit('cadastrar',{name: this.state.name, email: this.state.email ,password: this.state.password, passwordConfirm: this.state.passwordConfirm});
   }
+
   _renderButton = (text, onPress) => (
     <TouchableOpacity onPress={onPress}>
       <View style={styles.button}>

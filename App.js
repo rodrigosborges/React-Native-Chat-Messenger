@@ -48,7 +48,7 @@ const SimpleApp = StackNavigator({
         title: 'Chat',
         headerTitleStyle: styles.back,
         headerTintColor: 'white',
-        // headerRight: <View/>
+        headerRight: <View/>
       }
     },
     Contatos: {

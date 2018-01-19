@@ -11,8 +11,8 @@ export default class Home extends Component {
   constructor(props){
     super(props);
     this.state = {
-        email: null,
-        password: null,
+        email: '',
+        password: '',
         isVisible: false,
         height: Dimensions.get('window').height,
         width: Dimensions.get('window').width,
@@ -28,9 +28,7 @@ export default class Home extends Component {
     if(user == false){
       this.setState({isVisible: true});
     }else{
-      AsyncStorage.setItem('remember_token', stringify(user.remember_token));
-      AsyncStorage.setItem('id', stringify(user.id));
-      navigate('Contatos');
+      navigate('Contatos', {id: user.id});
     }
   }
 
@@ -70,7 +68,7 @@ export default class Home extends Component {
           <Image source={logo} style={styles.logo}></Image>
         </View>
         <View>
-          <Button title="preencher" onPress={() => {this.setState({email: "gmrodrigoborges@gmail.com"}, this.setState({password: "Oioi"}))}} />
+          <Button title="preencher" onPress={() => {this.setState({email: "gmrodrigoborges@gmail.com"}, this.setState({password: "123"}))}} />
         </View>
         <View>
           <TextInput style={styles.input} onChangeText={email => this.setState({ email })} value={this.state.email} underlineColorAndroid={'white'} keyboardType="email-address" placeholder="E-mail"/>

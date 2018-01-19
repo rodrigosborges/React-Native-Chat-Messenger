@@ -9,6 +9,9 @@ server.listen(3000, () => console.log('listening on *:3000'));
 
 var random_name = require('node-random-name');
 var models = require('./models');
+var bcrypt = require('bcrypt-nodejs');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 var clients = {}
 var users = {}
@@ -19,6 +22,8 @@ websocket.on('connection', socket => {
     socket.on('userJoined', userId => onUserJoined(userId, socket));
     socket.on('message', message => onMessageReceived(message, socket));
     socket.on('login', params => login(params[0],params[1], socket));
+    socket.on('cadastrar', params => cadastrar(params.name, params.email, params.password, params.passwordConfirm, socket));
+    socket.on('contatos', id => contatos(id, socket));
 });
 
 function onUserJoined(userId, socket) {
@@ -79,14 +84,47 @@ function _sendAndSaveMessage(message, socket, fromServer) {
   })
 }
 
-function login(email, password, socket){
-  models.user.findOne({where: {email}}).then(user => {
-    if(password == user.password){
-      socket.emit('logado', user);
-    }else{
-      socket.emit('logado',false);
+function contatos(id, socket){
+  models.user.findAll({
+    where: {
+      id: {
+        [Op.ne]: id,
+      } 
     }
+  }).then(contatos => {
+    socket.emit('contatos',contatos);
   });
+}
+
+function cadastrar(name, email, password, passwordConfirm, socket){
+  if(name == '' || email == '' || password == '' || passwordConfirm == '' || password != passwordConfirm){
+    socket.emit('cadastrar',false);
+  }else{
+    models.user.findOne({where: {email}}).then(user => {
+      if(user == null){
+        password = bcrypt.hashSync(password);
+        models.user.create({name, email, password, status: "kk eae men"}).then( user => {
+          socket.emit('cadastrar',{id: user.id, remember_token: user.remember_token});
+        });
+      }else{
+        socket.emit('cadastrar',false);
+      }
+    });
+  }
+}
+
+function login(email, password, socket){
+  if(email == '' || password == '')
+    socket.emit('logado',false);
+  else{
+    models.user.findOne({where: {email}}).then(user => {
+      if(bcrypt.compareSync(password, user.password)){
+        socket.emit('logado', user);
+      }else{
+        socket.emit('logado',false);
+      }
+    });
+  }
 }
 
 var stdin = process.openStdin();
