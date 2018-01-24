@@ -32,7 +32,7 @@ export default class Home extends Component {
     }else{
       AsyncStorage.setItem('remember_token', stringify(cadastro.remember_token));
       AsyncStorage.setItem('id', stringify(cadastro.id));
-      navigate('Contatos');
+      navigate('Home');
     }
   }
 

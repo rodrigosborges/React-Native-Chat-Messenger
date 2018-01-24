@@ -4,13 +4,25 @@ import logo from './../message.png';
 import user from './../user.png';
 import SocketIOClient from 'socket.io-client/dist/socket.io.js';
 import { stringify } from 'querystring';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Modal from "react-native-modal";
+import {FormLabel, FormInput, FormValidationMessage} from 'react-native-elements';
 
 export default class Contatos extends Component {
+  static navigationOptions =({navigation})=> ({
+    headerRight:(
+      <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
+        <Icon name="md-person-add" size={35} style={{marginRight: 10}}color='white'/>
+      </TouchableOpacity>
+    )
+  });
+
   constructor(props){
     super(props);
     this.state = {
         id: 0,
         contacts: [],
+        isVisible: false,
     };
     
     this.contatos = this.contatos.bind(this);
@@ -43,9 +55,34 @@ export default class Contatos extends Component {
     navigate('Chat', {contact, id});
   }
 
+  
+  _renderButton = (text, onPress) => (
+    <TouchableOpacity onPress={onPress}>
+      <View style={styles.button}>
+        <Text>{text}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  _renderModalContent = () => (
+    <View style={styles.modalContent}>
+      <FormLabel labelStyle={{fontSize:15}}>Senha</FormLabel>
+      <FormInput style={styles.input} secureTextEntry={true} onChangeText={(text) => this.setState({password: text})}/>
+      {this._renderButton("Ok", () => this.setState({ isVisible: false }))}
+    </View>
+  );
+
+
   render() {
     var height= Dimensions.get('window').height;
     var width= Dimensions.get('window').width;
+    <Modal
+      isVisible={this.state.isVisible}
+      animationIn="slideInLeft"
+      animationOut="slideOutRight"
+    >
+      {this._renderModalContent()}
+    </Modal>
     const contacts =  this.state.contacts.map((contact, index) => (
       <TouchableOpacity key={index} style={styles.contact} onPress={() => this.openChat(contact)}>
           <View style={{width: width*0.25}}>

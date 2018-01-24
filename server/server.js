@@ -15,32 +15,23 @@ const Op = Sequelize.Op;
 
 var clients = {}
 var users = {}
-var user_id = 1
+var user_id = null
+var receiver_id = null
 
 websocket.on('connection', socket => {
     clients[socket.id] = socket;
-    socket.on('userJoined', userId => onUserJoined(userId, socket));
-    socket.on('message', message => onMessageReceived(message, socket));
+    socket.on('userJoined', params => onUserJoined(params[0],params[1], socket));
+    socket.on('message', params => onMessageReceived(params, socket));
     socket.on('login', params => login(params[0],params[1], socket));
     socket.on('cadastrar', params => cadastrar(params.name, params.email, params.password, params.passwordConfirm, socket));
     socket.on('contatos', id => contatos(id, socket));
 });
 
-function onUserJoined(userId, socket) {
-  try {
-    if (!userId) {
-      var user = models.user.create({name: random_name()}).then( user => {
-        socket.emit('userJoined', `${user.id}` );
-        users[socket.id] = user.id;
-        _sendExistingMessages(socket)
-      });
-    } else {
-      users[socket.id] = userId
-      _sendExistingMessages(socket)
-    }
-  } catch(err) {
-    console.log(err)
-  }
+function onUserJoined(userId, receiver_id, socket) {
+  users[socket.id] = userId
+  this.user_id = userId
+  this.receiver_id = receiver_id
+  _sendExistingMessages(socket, userId, receiver_id)
 }
 
 function onMessageReceived(message, senderSocket) {
@@ -49,16 +40,21 @@ function onMessageReceived(message, senderSocket) {
   _sendAndSaveMessage(message, senderSocket)
 }
 
-function _sendExistingMessages(socket) {
-  var messages = models.message.findAll({ where: {user_id} }).then( messages => {
+function _sendExistingMessages(socket, user_id, receiver_id) {
+  var messages = models.message.findAll({ 
+    where: {
+      [Op.or]: [{user_id}, {user_id: receiver_id}],
+      [Op.or]: [{receiver_id: user_id}, {receiver_id}]  
+    }
+  }).then( messages => {
     messages = messages.map(m => ({
-        _id: m.id,
-        content: m.content,
-        createdAt: m.createdAt,
-        user: {
-          _id: m.user_id,
-          name: 'React Native'
-        }
+      _id: m.id,
+      text: m.content,
+      createdAt: m.createdAt,
+      user: {
+        _id: m.user_id,
+        name: 'React Native'
+      }
     }))
     socket.emit('message', messages.reverse());
   })
@@ -68,6 +64,7 @@ function _sendAndSaveMessage(message, socket, fromServer) {
   var m = {
     content: message.text,
     user_id: message.user._id,
+    receiver_id: this.receiver_id,
     createdAt: new Date(message.createdAt),
   }
   models.message.create(m).then( message => {

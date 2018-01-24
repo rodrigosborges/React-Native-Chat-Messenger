@@ -1,11 +1,11 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableHighlight } from 'react-native';
+import { StyleSheet, Text, View, TouchableHighlight, Button } from 'react-native';
 import { StackNavigator, navigate } from 'react-navigation';
 import Home from './src/components/Home';
 import Cadastro from './src/components/Cadastro';
 import Chat from './src/components/Chat';
 import Contatos from './src/components/Contatos';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const styles = StyleSheet.create({
   header: {
@@ -45,7 +45,6 @@ const SimpleApp = StackNavigator({
       screen: Chat,
       navigationOptions:{
         headerStyle: styles.header,
-        title: 'Chat',
         headerTitleStyle: styles.back,
         headerTintColor: 'white',
         headerRight: <View/>
@@ -58,7 +57,6 @@ const SimpleApp = StackNavigator({
         title: 'Contatos',
         headerTitleStyle: styles.back,
         headerTintColor: 'white',
-        headerRight: <View/>                                                                    
       }
     }
 

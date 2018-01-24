@@ -47,7 +47,7 @@ export default class Home extends Component {
   _renderModalContent = () => (
     <View style={styles.modalContent}>
       <Image source={senhaIncorreta} style={styles.erro_senha} />
-      {this._renderButton("Fechar", () => this.setState({ isVisible: false }))}
+      {this._renderButton("Ok", () => this.setState({ isVisible: false }))}
     </View>
   );
 
