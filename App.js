@@ -6,6 +6,7 @@ import Cadastro from './src/components/Cadastro';
 import Chat from './src/components/Chat';
 import Contatos from './src/components/Contatos';
 import Icon from 'react-native-vector-icons/Ionicons';
+import AdicionarContatos from './src/components/AdicionarContatos';
 
 const styles = StyleSheet.create({
   header: {
@@ -57,6 +58,16 @@ const SimpleApp = StackNavigator({
         title: 'Contatos',
         headerTitleStyle: styles.back,
         headerTintColor: 'white',
+      }
+    },
+    AdicionarContatos: {
+      screen: AdicionarContatos,
+      navigationOptions:{
+        headerStyle: styles.header,
+        title: 'Adicionar Contato',
+        headerTitleStyle: styles.back,
+        headerTintColor: 'white',
+        headerRight: <View/>
       }
     }
 

@@ -36,6 +36,7 @@ websocket.on('connection', socket => {
     socket.on('login', params => login(params[0],params[1], socket));
     socket.on('cadastrar', params => cadastrar(params.name, params.email, params.password, params.passwordConfirm, socket));
     socket.on('contatos', id => contatos(id, socket));
+    socket.on('adicionar', params => adicionar(params, socket));
 });
 
 function onUserJoined(userId, receiver_id, socket) {
@@ -108,7 +109,6 @@ function contatos(id, socket){
       as: 'user'
     }],
   }).then(contatos => {
-    console.log(contatos)
     socket.emit('contatos',contatos);
   });
 }
@@ -146,6 +146,9 @@ function login(email, password, socket){
       }
     });
   }
+}
+
+function adicionar(params, socket){
 }
 
 var stdin = process.openStdin();

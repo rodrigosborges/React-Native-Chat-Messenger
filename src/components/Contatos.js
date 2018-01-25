@@ -11,7 +11,7 @@ import {FormLabel, FormInput, FormValidationMessage} from 'react-native-elements
 export default class Contatos extends Component {
   static navigationOptions =({navigation})=> ({
     headerRight:(
-      <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
+      <TouchableOpacity onPress={() => navigation.navigate('AdicionarContatos')}>
         <Icon name="md-person-add" size={35} style={{marginRight: 10}}color='white'/>
       </TouchableOpacity>
     )
