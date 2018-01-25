@@ -84,16 +84,16 @@ export default class Contatos extends Component {
       {this._renderModalContent()}
     </Modal>
     const contacts =  this.state.contacts.map((contact, index) => (
-      <TouchableOpacity key={index} style={styles.contact} onPress={() => this.openChat(contact)}>
+      <TouchableOpacity key={index} style={styles.contact} onPress={() => this.openChat(contact.user)}>
           <View style={{width: width*0.25}}>
             <Image source={user} style={styles.user} />
           </View>
           <View style={{width: width*0.75}}>
             <View style={{height: 35, marginTop:10}}>
-              <Text style={styles.name}>{contact.name}</Text>
+              <Text style={styles.name}>{contact.user.name}</Text>
             </View>
             <View style={{height: 35}}>
-              <Text style={styles.status}>{contact.status}</Text>
+              <Text style={styles.status}>{contact.user.status}</Text>
             </View>
           </View>
       </TouchableOpacity>

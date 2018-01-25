@@ -13,9 +13,20 @@ var bcrypt = require('bcrypt-nodejs');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
+// associations
+
+  // message - user
+    models.message.belongsTo(models.user, {foreignKey: 'user_id'})
+    models.user.hasMany(models.message, {foreignKey: 'id'})
+
+  // user - contacts
+    models.user.hasMany(models.contact, {foreignKey: 'id'})
+    models.contact.belongsTo(models.user, {as: 'user', foreignKey: 'contact_id'})
+
 var clients = {}
 var users = {}
 var user_id = null
+var user_name = null
 var receiver_id = null
 
 websocket.on('connection', socket => {
@@ -30,6 +41,9 @@ websocket.on('connection', socket => {
 function onUserJoined(userId, receiver_id, socket) {
   users[socket.id] = userId
   this.user_id = userId
+  models.user.findOne({where: {id: userId}}).then( user => { 
+    this.user_name = user.name
+  })
   this.receiver_id = receiver_id
   _sendExistingMessages(socket, userId, receiver_id)
 }
@@ -45,7 +59,10 @@ function _sendExistingMessages(socket, user_id, receiver_id) {
     where: {
       [Op.or]: [{user_id}, {user_id: receiver_id}],
       [Op.or]: [{receiver_id: user_id}, {receiver_id}]  
-    }
+    },
+    include: [{
+      model: models.user
+    }]
   }).then( messages => {
     messages = messages.map(m => ({
       _id: m.id,
@@ -53,7 +70,7 @@ function _sendExistingMessages(socket, user_id, receiver_id) {
       createdAt: m.createdAt,
       user: {
         _id: m.user_id,
-        name: 'React Native'
+        name: m.user.name
       }
     }))
     socket.emit('message', messages.reverse());
@@ -75,20 +92,23 @@ function _sendAndSaveMessage(message, socket, fromServer) {
       createdAt: m.createdAt,
       user: {
         _id: m.user_id,
-        name: 'React Native'
+        name: this.user_name
       }
   }])
   })
 }
 
 function contatos(id, socket){
-  models.user.findAll({
+  models.contact.findAll({
     where: {
-      id: {
-        [Op.ne]: id,
-      } 
-    }
+      user_id: id
+    },
+    include: [{
+      model: models.user,
+      as: 'user'
+    }],
   }).then(contatos => {
+    console.log(contatos)
     socket.emit('contatos',contatos);
   });
 }
@@ -115,8 +135,12 @@ function login(email, password, socket){
     socket.emit('logado',false);
   else{
     models.user.findOne({where: {email}}).then(user => {
-      if(bcrypt.compareSync(password, user.password)){
-        socket.emit('logado', user);
+      if(user != null){
+        if(bcrypt.compareSync(password, user.password)){
+          socket.emit('logado', user);
+        }else{
+          socket.emit('logado',false);
+        }
       }else{
         socket.emit('logado',false);
       }
