@@ -13,26 +13,26 @@ export default class Home extends Component {
     this.state = {
         contato: '',
         isVisible: false,
-        botao: ''
+        botao: '',
+        mensagem: '',
+        id: 0,
     };
     this.adicionar = this.adicionar.bind(this);
     this.adicionarCallback = this.adicionarCallback.bind(this);
     this.socket = SocketIOClient('http://192.168.11.51:3000', { timeout: 30000 });
     this.socket.on('adicionar',this.adicionarCallback);
+
+    AsyncStorage.getItem('id').then(response => {
+      this.setState({id: Number.parseInt(response,10)});
+    })
   }
 
-  adicionarCallback(cadastro){
-    const {navigate} = this.props.navigation; 
-    const { goBack } = this.props.navigation;
-    if(cadastro == false){
-      this.setState({isVisible: true});
-    }else{
-      navigate('Home');
-    }
+  adicionarCallback(params){
+    this.setState({isVisible: !params[0], mensagem: params[1]})
   }
 
   adicionar(){
-    this.socket.emit('adicionar',this.state.contato);
+      this.socket.emit('adicionar',[this.state.id,this.state.contato]);
   }
 
   _renderButton = (text, onPress) => (
@@ -45,8 +45,8 @@ export default class Home extends Component {
 
   _renderModalContent = () => (
     <View style={styles.modalContent}>
-      <Text>Dados inválidos</Text>
-      {this._renderButton("Fechar", () => this.setState({ isVisible: false }))}
+      <Text>{this.state.mensagem}</Text>
+      {this._renderButton("Fechar", () => this.setState({ isVisible: false, contato: '' }))}
     </View>
   );
 
@@ -68,7 +68,7 @@ export default class Home extends Component {
             <Text style={styles.mensagem}> Digite o nome de usuário ou email do contato que deseja adicionar</Text>
           </View>
           <View style={{ justifyContent: "center"}}>
-            <FormInput style={styles.input} onChangeText={(text) => {this.setState({contato: text})}}/>
+            <FormInput style={styles.input} value={this.state.contato} onChangeText={(text) => {this.setState({contato: text})}}/>
           </View>
           <View style={{ alignItems: 'center'}}>
             <Button textStyle={{fontSize: 16}} onPress={() => this.adicionar()} buttonStyle={styles.botao} title="ADICIONAR"/>

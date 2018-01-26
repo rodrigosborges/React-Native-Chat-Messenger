@@ -13,16 +13,6 @@ var bcrypt = require('bcrypt-nodejs');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
-// associations
-
-  // message - user
-    models.message.belongsTo(models.user, {foreignKey: 'user_id'})
-    models.user.hasMany(models.message, {foreignKey: 'id'})
-
-  // user - contacts
-    models.user.hasMany(models.contact, {foreignKey: 'id'})
-    models.contact.belongsTo(models.user, {as: 'user', foreignKey: 'contact_id'})
-
 var clients = {}
 var users = {}
 var user_id = null
@@ -36,7 +26,7 @@ websocket.on('connection', socket => {
     socket.on('login', params => login(params[0],params[1], socket));
     socket.on('cadastrar', params => cadastrar(params.name, params.email, params.password, params.passwordConfirm, socket));
     socket.on('contatos', id => contatos(id, socket));
-    socket.on('adicionar', params => adicionar(params, socket));
+    socket.on('adicionar', params => adicionar(params[0],params[1], socket));
 });
 
 function onUserJoined(userId, receiver_id, socket) {
@@ -148,7 +138,24 @@ function login(email, password, socket){
   }
 }
 
-function adicionar(params, socket){
+function adicionar(user_id,email, socket){
+  models.user.findOne({where: {email}}).then( user => {
+    if(user == null){
+      socket.emit('adicionar',[false, "Contato não encontrado"])
+    }else{
+      models.contact.findOne({where:{user_id, contact_id: user.id}}).then( contact => {
+        if(contact == null){
+          models.contact.create({user_id, contact_id: user.id, approved: 0})
+          socket.emit('adicionar',[true,"Pedido de amizade enviado"])
+        }else{
+          if(contact.approved)
+            socket.emit('adicionar',[false, "Contato já foi adicionado anteriormente"])
+          else
+            socket.emit('adicionar',[false, "Pedido de amizade já foi enviado anteriormente"])
+        }
+      })
+    }
+  })
 }
 
 var stdin = process.openStdin();

@@ -41,11 +41,11 @@ export default class Contatos extends Component {
   }
   
   contatos(){
-    AsyncStorage.setItem('id', stringify(this.props.navigation.id)).then(() => {
+    var id = this.props.navigation.state.params.id
+    AsyncStorage.setItem('id', id+'').then((value) => {
       this.setState({id: this.props.navigation.state.params.id});
       this.socket.emit('contatos', this.props.navigation.state.params.id);
     })
-
   }
 
 
