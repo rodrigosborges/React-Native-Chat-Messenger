@@ -20,10 +20,8 @@ db.Sequelize = Sequelize;
 
 // user - message
 db.message.belongsTo(db.user, {foreignKey: 'user_id'})
-db.user.hasMany(db.message, {foreignKey: 'id'})
 
 // user - contacts
-db.user.hasMany(db.contact, {foreignKey: 'id'})
-db.contact.belongsTo(db.user, {as: 'user',foreignKey: 'contact_id'})
 
+db.contact.belongsTo(db.user, {as: 'user',foreignKey: 'contact_id'})
 module.exports = db;

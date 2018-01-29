@@ -77,22 +77,23 @@ function _sendAndSaveMessage(message, socket, fromServer) {
   }
   models.message.create(m).then( message => {
     var emitter = fromServer ? websocket : socket.broadcast;
+    name = this.user_name
     emitter.emit('message', [{
       _id: message.id,
       text: m.content,
       createdAt: m.createdAt,
       user: {
         _id: m.user_id,
-        name: this.user_name
+        name: name
       }
-  }])
+    }])
   })
 }
 
 function contatos(id, socket){
   models.contact.findAll({
     where: {
-      user_id: id
+      user_id: id,
     },
     include: [{
       model: models.user,
@@ -144,14 +145,15 @@ function adicionar(user_id,email, socket){
       socket.emit('adicionar',[false, "Contato não encontrado"])
     }else{
       models.contact.findOne({where:{user_id, contact_id: user.id}}).then( contact => {
-        if(contact == null){
-          models.contact.create({user_id, contact_id: user.id, approved: 0})
-          socket.emit('adicionar',[true,"Pedido de amizade enviado"])
+        if(user_id != user.id){
+          if(contact == null){
+            models.contact.create({user_id, contact_id: user.id})
+            socket.emit('adicionar',[true,"Contato adicionado"])
+          }else{
+            socket.emit('adicionar',[false, "Você já possui esse contato"])
+          }
         }else{
-          if(contact.approved)
-            socket.emit('adicionar',[false, "Contato já foi adicionado anteriormente"])
-          else
-            socket.emit('adicionar',[false, "Pedido de amizade já foi enviado anteriormente"])
+          socket.emit('adicionar',[false, "Você não pode adicionar a si mesmo"])
         }
       })
     }

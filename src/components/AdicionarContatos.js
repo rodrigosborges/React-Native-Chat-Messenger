@@ -28,25 +28,36 @@ export default class Home extends Component {
   }
 
   adicionarCallback(params){
-    this.setState({isVisible: !params[0], mensagem: params[1]})
+    this.setState({isVisible: true, mensagem: params[1]})
   }
 
   adicionar(){
       this.socket.emit('adicionar',[this.state.id,this.state.contato]);
   }
 
+  fechar(){
+    const {navigate} = this.props.navigation
+    if(this.state.mensagem == "Contato adicionado"){
+      this.setState({ isVisible: false, contato: '' })
+      navigate('Contatos', {id: this.state.id})
+    }else{
+      this.setState({ isVisible: false, contato: '' })
+    }
+  
+  }
+
   _renderButton = (text, onPress) => (
     <TouchableOpacity onPress={onPress}>
-      <View style={styles.button}>
-        <Text>{text}</Text>
+      <View style={styles.buttonModal}>
+        <Text style={{fontSize: 18}}>{text}</Text>
       </View>
     </TouchableOpacity>
   );
 
   _renderModalContent = () => (
     <View style={styles.modalContent}>
-      <Text>{this.state.mensagem}</Text>
-      {this._renderButton("Fechar", () => this.setState({ isVisible: false, contato: '' }))}
+      <Text style={styles.mensagemModal}>{this.state.mensagem}</Text>
+      {this._renderButton("FECHAR", () => this.fechar())}
     </View>
   );
 
@@ -107,13 +118,12 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "white",
-    justifyContent: "center",
     alignItems: "center",
     borderRadius: 15,
     borderColor: "grey",
     width: width*0.8,
     marginLeft: width*0.05,
-    height: height*0.5,
+    height: height*0.3,
   },
   bottomModal: {
     justifyContent: "flex-end",
@@ -126,5 +136,21 @@ const styles = StyleSheet.create({
       margin: 7,
       marginTop: height*0.05,
       marginBottom: height*0.1,
+  },
+  buttonModal: {
+    borderBottomRightRadius: 15,
+    borderBottomLeftRadius: 15,
+    backgroundColor: '#e6e6e6',
+    borderColor: '#a6a6a6',
+    width: width*0.8,
+    height: height*0.1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  mensagemModal: {
+    fontSize: 18,
+    height: height*0.1,
+    marginTop: height*0.1,
+    textAlign: 'center'
   }
 })
