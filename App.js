@@ -58,6 +58,7 @@ const SimpleApp = StackNavigator({
         title: 'Contatos',
         headerTitleStyle: styles.back,
         headerTintColor: 'white',
+        headerLeft: <View/>
       }
     },
     AdicionarContatos: {

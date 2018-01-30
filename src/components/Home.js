@@ -6,6 +6,7 @@ import senhaIncorreta from './../senha_incorreta.jpg';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 import SocketIOClient from 'socket.io-client/dist/socket.io.js';
 import { stringify } from 'querystring';
+import { NavigationActions } from 'react-navigation';
 
 export default class Home extends Component {
   constructor(props){
@@ -28,7 +29,12 @@ export default class Home extends Component {
     if(user == false){
       this.setState({isVisible: true});
     }else{
-      navigate('Contatos', {id: user.id});
+      this.props.navigation.dispatch(NavigationActions.reset({
+        index:0,
+        actions:[
+          NavigationActions.navigate({routeName:'Contatos', params: {id: user.id, }})
+        ]
+      }))
     }
   }
 

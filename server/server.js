@@ -27,6 +27,7 @@ websocket.on('connection', socket => {
     socket.on('cadastrar', params => cadastrar(params.name, params.email, params.password, params.passwordConfirm, socket));
     socket.on('contatos', id => contatos(id, socket));
     socket.on('adicionar', params => adicionar(params[0],params[1], socket));
+    socket.on('excluirContato', id => excluirContato(id[0], id[1] , socket));
 });
 
 function onUserJoined(userId, receiver_id, socket) {
@@ -48,8 +49,10 @@ function onMessageReceived(message, senderSocket) {
 function _sendExistingMessages(socket, user_id, receiver_id) {
   var messages = models.message.findAll({ 
     where: {
-      [Op.or]: [{user_id}, {user_id: receiver_id}],
-      [Op.or]: [{receiver_id: user_id}, {receiver_id}]  
+      [Op.and]:[
+        [{user_id: [user_id,receiver_id]}],
+        [{receiver_id: [user_id,receiver_id]}],
+      ]
     },
     include: [{
       model: models.user
@@ -95,6 +98,9 @@ function contatos(id, socket){
     where: {
       user_id: id,
     },
+    order:[
+      [models.contact.associations.user, 'name','ASC']
+    ],
     include: [{
       model: models.user,
       as: 'user'
@@ -102,6 +108,16 @@ function contatos(id, socket){
   }).then(contatos => {
     socket.emit('contatos',contatos);
   });
+}
+
+function excluirContato(id,contact_id, socket){
+  models.contact.destroy({
+    where:{
+      user_id: id,
+      contact_id: contact_id,
+    },
+  })
+  socket.emit('excluirContato')
 }
 
 function cadastrar(name, email, password, passwordConfirm, socket){

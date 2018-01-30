@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
-import { Alert, AppRegistry, StyleSheet, View , Text, TextInput, Button, Image,ScrollView, ReactNative, AsyncStorage, TouchableOpacity, Dimensions } from 'react-native';
+import { Alert, AppRegistry,Animated, StyleSheet, View , Text, TextInput, Button, Image,ScrollView, ReactNative, AsyncStorage, TouchableOpacity, Dimensions } from 'react-native';
 import logo from './../message.png';
 import user from './../user.png';
 import SocketIOClient from 'socket.io-client/dist/socket.io.js';
 import { stringify } from 'querystring';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Modal from "react-native-modal";
 import {FormLabel, FormInput, FormValidationMessage} from 'react-native-elements';
+import Modal from "react-native-modal";
+import { NavigationActions } from 'react-navigation';
 
 export default class Contatos extends Component {
   static navigationOptions =({navigation})=> ({
@@ -22,13 +23,23 @@ export default class Contatos extends Component {
     this.state = {
         id: 0,
         contacts: [],
+        mensagem: '',
         isVisible: false,
+        contatoExcluir: {
+          user: {
+            name: ''
+          }
+        },
+        pressAction: new Animated.Value(0),
     };
     
     this.contatos = this.contatos.bind(this);
     this.contatosCallback = this.contatosCallback.bind(this);
+    this.excluirContato = this.excluirContato.bind(this);
+    this.excluirContatoCallback = this.excluirContatoCallback.bind(this);
     this.socket = SocketIOClient('http://192.168.11.51:3000', { timeout: 30000 });
     this.socket.on('contatos',this.contatosCallback);
+    this.socket.on('excluirContato',this.excluirContatoCallback);
   };
   
   
@@ -38,6 +49,10 @@ export default class Contatos extends Component {
   
   componentWillMount(){
     this.contatos();
+  }
+
+  fechar(){
+    this.setState({isVisible: false})
   }
   
   contatos(){
@@ -55,20 +70,39 @@ export default class Contatos extends Component {
     navigate('Chat', {contact, id});
   }
 
-  
-  _renderButton = (text, onPress) => (
-    <TouchableOpacity onPress={onPress}>
-      <View style={styles.button}>
-        <Text>{text}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  excluir(contact){
+    this.setState({isVisible: true, contatoExcluir: contact})
+  }
+
+  excluirContato(){
+    this.socket.emit('excluirContato', [this.state.id,this.state.contatoExcluir.user.id])
+  }
+
+  excluirContatoCallback(){
+    console.log(1)
+    this.props.navigation.dispatch(NavigationActions.reset({
+      index:0,
+      actions:[
+        NavigationActions.navigate({routeName:'Contatos', params: {id: this.state.id, }})
+      ]
+    }))
+  }
 
   _renderModalContent = () => (
     <View style={styles.modalContent}>
-      <FormLabel labelStyle={{fontSize:15}}>Senha</FormLabel>
-      <FormInput style={styles.input} secureTextEntry={true} onChangeText={(text) => this.setState({password: text})}/>
-      {this._renderButton("Ok", () => this.setState({ isVisible: false }))}
+      <Text style={styles.mensagemModal}>Deseja excluir {this.state.contatoExcluir.user.name} da sua lista de amigos?</Text>
+      <View style={{flexDirection:'row'}}>
+        <TouchableOpacity onPress={() => this.fechar()}>
+          <View style={styles.buttonNao}>
+            <Text style={{fontSize: 18}}>Não</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.excluirContato()}>
+          <View style={styles.buttonSim}>
+            <Text style={{fontSize: 18}}>Sim</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -76,15 +110,8 @@ export default class Contatos extends Component {
   render() {
     var height= Dimensions.get('window').height;
     var width= Dimensions.get('window').width;
-    <Modal
-      isVisible={this.state.isVisible}
-      animationIn="slideInLeft"
-      animationOut="slideOutRight"
-    >
-      {this._renderModalContent()}
-    </Modal>
     const contacts =  this.state.contacts.map((contact, index) => (
-      <TouchableOpacity key={index} style={styles.contact} onPress={() => this.openChat(contact.user)}>
+      <TouchableOpacity key={index} style={styles.contact} onPress={() => this.openChat(contact.user)} delayLongPress={500} onLongPress={() => this.excluir(contact)}>
           <View style={{width: width*0.25}}>
             <Image source={user} style={styles.user} />
           </View>
@@ -101,11 +128,20 @@ export default class Contatos extends Component {
 
     return (
       <ScrollView style={styles.contacts}>
-          {contacts}
+        <Modal
+          isVisible={this.state.isVisible}
+          animationIn="slideInLeft"
+          animationOut="slideOutRight"
+        >
+          {this._renderModalContent()}
+        </Modal>
+        {contacts}
       </ScrollView>
     );
   }
 }
+var height = Dimensions.get('window').height;
+var width = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   container: {
     flex:1,
@@ -148,4 +184,48 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
     flexDirection: 'row',
   },
+  mensagem: {
+    fontSize: 20,
+    color: 'grey',
+    textAlign: 'center',
+    margin: 7,
+    marginTop: height*0.05,
+    marginBottom: height*0.1,
+},
+buttonNao: {
+  borderBottomLeftRadius: 15,
+  backgroundColor: '#e6e6e6',
+  borderColor: 'black',
+  borderWidth: 1,
+  borderRightWidth: 0,
+  width: width*0.4,
+  height: height*0.1,
+  alignItems: "center",
+  justifyContent: "center"
+},
+buttonSim: {
+  borderBottomRightRadius: 15,
+  backgroundColor: '#e6e6e6',
+  borderWidth: 1,
+  borderColor: 'black',
+  width: width*0.4,
+  height: height*0.1,
+  alignItems: "center",
+  justifyContent: "center"
+},
+mensagemModal: {
+  fontSize: 18,
+  height: height*0.1,
+  marginTop: height*0.1,
+  textAlign: 'center'
+},
+modalContent: {
+  backgroundColor: "white",
+  alignItems: "center",
+  borderRadius: 15,
+  borderColor: "grey",
+  width: width*0.8,
+  marginLeft: width*0.05,
+  height: height*0.3,
+}
 })
