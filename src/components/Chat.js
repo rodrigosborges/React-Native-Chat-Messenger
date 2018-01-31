@@ -58,8 +58,7 @@ export default class App extends Component {
           messages={this.state.messages}
           onSend={this.onSend}
           user={user}
-          showUserAvatar={true}
-          renderAvatarOnTop={true}
+          renderAvatar={null}
           keyboardShouldPersistTaps={'never'}
         />
         <KeyboardSpacer />

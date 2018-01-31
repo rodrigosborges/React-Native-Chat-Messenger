@@ -1,17 +1,25 @@
 var express = require('express');
 var http = require('http')
 var socketio = require('socket.io');
-
+var Module = require('module');
+var fs     = require('fs');
 var app = express();
 var server = http.Server(app);
 var websocket = socketio(server, { pingTimeout: 30000, timeout: 30000 });
 server.listen(3000, () => console.log('listening on *:3000'));
+
+Module._extensions['.jpg'] = function(module, fn) {
+  var base64 = fs.readFileSync(fn).toString('base64');
+  module._compile('module.exports="data:image/jpg;base64,' + base64 + '"', fn);
+};
 
 var random_name = require('node-random-name');
 var models = require('./models');
 var bcrypt = require('bcrypt-nodejs');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
+
+var avatar = require('./avatar.jpg');
 
 var clients = {}
 var users = {}
@@ -64,8 +72,7 @@ function _sendExistingMessages(socket, user_id, receiver_id) {
       createdAt: m.createdAt,
       user: {
         _id: m.user_id,
-        name: m.user.name
-      }
+      },
     }))
     socket.emit('message', messages.reverse());
   })
@@ -87,7 +94,6 @@ function _sendAndSaveMessage(message, socket, fromServer) {
       createdAt: m.createdAt,
       user: {
         _id: m.user_id,
-        name: name
       }
     }])
   })
@@ -121,19 +127,23 @@ function excluirContato(id,contact_id, socket){
 }
 
 function cadastrar(name, email, password, passwordConfirm, socket){
-  if(name == '' || email == '' || password == '' || passwordConfirm == '' || password != passwordConfirm){
-    socket.emit('cadastrar',false);
+  if(name == '' || email == '' || password == '' || passwordConfirm == ''){
+    socket.emit('cadastrar',[false, "Preencha todos os campos"]);
   }else{
-    models.user.findOne({where: {email}}).then(user => {
-      if(user == null){
-        password = bcrypt.hashSync(password);
-        models.user.create({name, email, password, status: "kk eae men"}).then( user => {
-          socket.emit('cadastrar',{id: user.id, remember_token: user.remember_token});
-        });
-      }else{
-        socket.emit('cadastrar',false);
-      }
-    });
+    if(password != passwordConfirm){
+      socket.emit('cadastrar',[false, "As duas senhas devem ser iguais"]);
+    }else{
+      models.user.findOne({where: {email}}).then(user => {
+        if(user == null){
+          password = bcrypt.hashSync(password);
+          models.user.create({name, email, password, status: "kk eae men"}).then( user => {
+            socket.emit('cadastrar',[true,{id: user.id, remember_token: user.remember_token}]);
+          });
+        }else{
+          socket.emit('cadastrar',[false, "Email já cadastrado"]);
+        }
+      });
+    }
   }
 }
 

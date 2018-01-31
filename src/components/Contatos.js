@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Alert, AppRegistry,Animated, StyleSheet, View , Text, TextInput, Button, Image,ScrollView, ReactNative, AsyncStorage, TouchableOpacity, Dimensions } from 'react-native';
 import logo from './../message.png';
-import user from './../user.png';
+import user from './../user.jpg';
 import SocketIOClient from 'socket.io-client/dist/socket.io.js';
 import { stringify } from 'querystring';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -92,14 +92,14 @@ export default class Contatos extends Component {
     <View style={styles.modalContent}>
       <Text style={styles.mensagemModal}>Deseja excluir {this.state.contatoExcluir.user.name} da sua lista de amigos?</Text>
       <View style={{flexDirection:'row'}}>
-        <TouchableOpacity onPress={() => this.fechar()}>
-          <View style={styles.buttonNao}>
-            <Text style={{fontSize: 18}}>Não</Text>
-          </View>
-        </TouchableOpacity>
         <TouchableOpacity onPress={() => this.excluirContato()}>
           <View style={styles.buttonSim}>
             <Text style={{fontSize: 18}}>Sim</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.fechar()}>
+          <View style={styles.buttonNao}>
+            <Text style={{fontSize: 18}}>Não</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -172,7 +172,10 @@ const styles = StyleSheet.create({
   user:{
     height: 70,
     width: 70,
-    marginTop: 7
+    marginTop: 4,
+    marginLeft: 5,
+    borderRadius: 70/2,
+
   },
   status: {
     fontSize: 18,
@@ -193,7 +196,7 @@ const styles = StyleSheet.create({
     marginBottom: height*0.1,
 },
 buttonNao: {
-  borderBottomLeftRadius: 15,
+  borderBottomRightRadius: 15,
   backgroundColor: '#e6e6e6',
   borderColor: 'black',
   borderWidth: 1,
@@ -204,7 +207,7 @@ buttonNao: {
   justifyContent: "center"
 },
 buttonSim: {
-  borderBottomRightRadius: 15,
+  borderBottomLeftRadius: 15,
   backgroundColor: '#e6e6e6',
   borderWidth: 1,
   borderColor: 'black',
