@@ -36,6 +36,7 @@ websocket.on('connection', socket => {
     socket.on('contatos', id => contatos(id, socket));
     socket.on('adicionar', params => adicionar(params[0],params[1], socket));
     socket.on('excluirContato', id => excluirContato(id[0], id[1] , socket));
+    socket.on('dadosPerfil', id => dadosPerfil(id,socket));
 });
 
 function onUserJoined(userId, receiver_id, socket) {
@@ -183,6 +184,12 @@ function adicionar(user_id,email, socket){
         }
       })
     }
+  })
+}
+
+function dadosPerfil(id,socket){
+  models.user.findOne({where: {id}}).then(user => {
+    socket.emit('dadosPerfil',user);
   })
 }
 

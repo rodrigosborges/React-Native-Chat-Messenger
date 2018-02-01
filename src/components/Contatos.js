@@ -12,8 +12,8 @@ import { NavigationActions } from 'react-navigation';
 export default class Contatos extends Component {
   static navigationOptions =({navigation})=> ({
     headerRight:(
-      <TouchableOpacity onPress={() => navigation.navigate('AdicionarContatos')}>
-        <Icon name="md-person-add" size={35} style={{marginRight: 10}}color='white'/>
+      <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
+        <Icon name="md-settings" size={35} style={{marginRight: 10}}color='white'/>
       </TouchableOpacity>
     )
   });
@@ -125,8 +125,10 @@ export default class Contatos extends Component {
           </View>
       </TouchableOpacity>
     ));
+    const { navigate } = this.props.navigation;
 
     return (
+      <View>
       <ScrollView style={styles.contacts}>
         <Modal
           isVisible={this.state.isVisible}
@@ -137,6 +139,10 @@ export default class Contatos extends Component {
         </Modal>
         {contacts}
       </ScrollView>
+        <TouchableOpacity style={styles.adicionarContato} onPress={() => navigate('AdicionarContatos')}>
+            <Icon name="md-person-add" size={35} color='white'/>
+        </TouchableOpacity>
+      </View>
     );
   }
 }
@@ -230,5 +236,16 @@ modalContent: {
   width: width*0.8,
   marginLeft: width*0.05,
   height: height*0.3,
+},
+adicionarContato:{
+  position: 'absolute',
+  right: width*0.065,
+  top: height*0.75,
+  height:width*0.18,
+  width:width*0.18,
+  borderRadius: width*0.1,
+  backgroundColor: '#4d88ff',
+  alignItems: "center",
+  justifyContent: "center"
 }
 })

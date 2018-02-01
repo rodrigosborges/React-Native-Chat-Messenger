@@ -5,6 +5,7 @@ import Home from './src/components/Home';
 import Cadastro from './src/components/Cadastro';
 import Chat from './src/components/Chat';
 import Contatos from './src/components/Contatos';
+import Perfil from './src/components/Perfil';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AdicionarContatos from './src/components/AdicionarContatos';
 
@@ -66,6 +67,16 @@ const SimpleApp = StackNavigator({
       navigationOptions:{
         headerStyle: styles.header,
         title: 'Adicionar Contato',
+        headerTitleStyle: styles.back,
+        headerTintColor: 'white',
+        headerRight: <View/>
+      }
+    },
+    Perfil: {
+      screen: Perfil,
+      navigationOptions:{
+        headerStyle: styles.header,
+        title: 'Meu perfil',
         headerTitleStyle: styles.back,
         headerTintColor: 'white',
         headerRight: <View/>
