@@ -1,7 +1,7 @@
 import React,{ Component } from 'react';
 import { View, Text, AsyncStorage } from 'react-native';
 import SocketIOClient from 'socket.io-client/dist/socket.io.js';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, Actions } from 'react-native-gifted-chat';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
 const USER_ID = '@userId';
 
@@ -36,6 +36,23 @@ export default class App extends Component {
   onReceivedMessage(messages) {
     this._storeMessages(messages);
   }
+
+  renderActions(){
+    const options = {
+      'Action 1': (props) => {
+        alert('option 1');
+      },
+      'Action 2': (props) => {
+        alert('option 2');
+      },
+      'Cancel': () => {},
+    };
+    return (
+      <Actions
+        options={options}
+      />
+    );
+  }
   
   onSend(messages=[]) {
     this.socket.emit('message', messages[0]);
@@ -60,6 +77,7 @@ export default class App extends Component {
           user={user}
           renderAvatar={null}
           keyboardShouldPersistTaps={'never'}
+          renderActions={this.renderActions}
         />
         <KeyboardSpacer />
       </View>
