@@ -82,7 +82,7 @@ export default class Contatos extends Component {
             <FormInput style={styles.input} keyboardType="email-address" value={this.state.status} onChangeText={(text) => this.setState({email: text})}/>
           </View>
           <View>
-            <Button textStyle={{fontSize: 16}} buttonStyle={styles.botao} title="CADASTRAR" onPress={() => this.cadastrar()} />
+            <Button textStyle={{fontSize: 16}} buttonStyle={styles.botao} title="ATUALIZAR" onPress={() => this.cadastrar()} />
           </View>
         </View>
             <KeyboardSpacer/>
